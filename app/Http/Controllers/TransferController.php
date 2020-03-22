@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Tank;
 use App\Record;
 use App\Transfer;
@@ -13,7 +14,6 @@ class TransferController extends Controller
     {
         $this->tank = $tank;
         $this->record = $record;
-        $this->record1 = $record;
         $this->transfer = $transfer;
     }
 
@@ -36,13 +36,13 @@ class TransferController extends Controller
         $volume = $request->volume;
 
         //Get Previous Volume of From Tank
-        $volume_from_tank = $this->tank->find($from_tank);
-        $prev_volume_from_tank = $volume_from_tank->volume;
+        $get_from_tank = $this->tank->find($from_tank);
+        $prev_volume_from_tank = $get_from_tank->volume;
             //print $prev_volume_from_tank;
 
         //Get Previous Volume of To Tank
-        $volume_to_tank = $this->tank->find($to_tank);
-        $prev_volume_to_tank = $volume_to_tank->volume;
+        $get_to_tank = $this->tank->find($to_tank);
+        $prev_volume_to_tank = $get_to_tank->volume;
            // print $prev_volume_to_tank;
        
         //Make new transfer
@@ -62,49 +62,103 @@ class TransferController extends Controller
         * Create new record for this transfer, to take record of previous volume of From tank,
         * and new volume of  From tank. i.e (Tank that you are making transfer from).
         */
+            
+            $myRecord = [
+                [
+                    'opening_volume' =>  $prev_volume_from_tank, 
+                    'closing_volume' =>  $prev_volume_from_tank - $volume,
+                    'tank_id' => $from_tank
+                ],
+                [
+                    'opening_volume' => $prev_volume_to_tank,
+                    'closing_volume' => $prev_volume_to_tank + $volume,
+                    'tank_id' => $to_tank
+                ]
+                ];
 
-            $this->record->from_opening_volume = $prev_volume_from_tank;
-            $this->record->from_closing_volume = $prev_volume_from_tank - $volume;
-            $this->record->from_tank_id = $from_tank;       
+            // $this->record->from_opening_volume = $prev_volume_from_tank;
+            // $this->record->from_closing_volume = $prev_volume_from_tank - $volume;
+            // $this->record->from_tank_id = $from_tank;       
             
         /**
         * Create new record for this transfer, to take record of previous volume of To tank,
         * and new volume of  To tank. i.e (Tank that you are making transfer to).
         */
         
-            $this->record1->to_opening_volume = $prev_volume_to_tank;
-            $this->record1->to_closing_volume = $prev_volume_to_tank + $volume;
-            $this->record1->to_tank_id = $to_tank;
-        
-            if($this->record1->save())
+            // $this->record->to_opening_volume = $prev_volume_to_tank;
+            // $this->record->to_closing_volume = $prev_volume_to_tank + $volume;
+            // $this->record->to_tank_id = $to_tank;
+                $takeRecord = DB::table("records")->insert($myRecord);
+            if($takeRecord)
             {
-              
+        /**
+         *  update tank volume, From Tank 
+         *  i.e Volume remain in Tank you are making transfer from.
+        */
+            $get_from_tank->volume = $prev_volume_from_tank - $volume;
+            $get_from_tank->save();
+        /**
+         *  update tank volume, To Tank 
+         *  i.e Volume remain in Tank you are making transfer to.
+        */
+            $get_to_tank->volume = $prev_volume_to_tank + $volume;
+            $get_to_tank->save();
 
-
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Transfer made succesful'
             ], 200);
-            }
-        
-        
 
-        
+            }else{
 
-        /**
-         *  update tank volume, From Tank 
-         *  i.e Volume of Tank you are making transfer from.
-         */
-
-         //$this->tank->volume = $prev_volume_from_tank - $volume
-
-        //Update tank volume, To Tank
-
-        //Return success mesage
-            
+            /**
+             * Delete transfer that just created Now, if record is not save
+             * and tanks table is not updated.
+            */
+                $lastest_transfer = $this->transfer->latest()->first();
+                $lastest_transfer->delete();
+            /**
+             * Return Message that the transfer is not succesful.
+             */
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Something went wrong, Pleased try again'
+                ], 400);
+            }       
 
         }
     }
+    /**
+     *  Get daily volume in reserved tanks at all location
+     * 
+     * @reserved tank i.e underground tank
+     * 
+     * @underground tank_type_id is 1
+     */
+    public function dailyVolume()
+    {
+        if($dailyvolume = $this->tank->where('tank_type_id', '=', 1)->get())
+        {
 
+            return response()->json([
+            'success' => true,
+            'data' => $dailyvolume->toArray()
+        ], 200);
+    
+
+    }else{
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Can not get daily volume of reselved tank at this moment'
+        ], 501);
+    }
+
+    }
+
+    /**
+     * 
+     */
       
 }
