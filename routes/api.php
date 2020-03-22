@@ -19,7 +19,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('/login', 'PassportController@login')->name('login');
 Route::post('/register', 'PassportController@register')->name('register');
-// Route::post('register', 'PassportController@register')->name('register');
 Route::middleware('auth:api')->group(function(){
         Route::get('/user', 'PassportController@details');
 
@@ -35,5 +34,8 @@ Route::middleware('auth:api')->group(function(){
         Route::delete('/tank/{id}/delete', 'TankController@destroy')->name('tank.destroy');
 
         Route::post('/maketransfer', 'TransferController@transfer')->name('make.transfer');
+
+        Route::get('/dailyVolume', 'TransferController@dailyVolume')->name('daily.volume');
+
 });
 
