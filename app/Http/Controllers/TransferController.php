@@ -73,10 +73,10 @@ class TransferController extends Controller
         * and new volume of  To tank. i.e (Tank that you are making transfer to).
         */
        
-        // $this->record1->opening_volume = $prev_volume_to_tank;
-        // $this->record1->closing_volume = $prev_volume_to_tank + $volume;
-        // $this->record1->tank_id = $to_tank;
-        // $this->record1->save();
+        $this->record1->opening_volume = $prev_volume_to_tank;
+        $this->record1->closing_volume = $prev_volume_to_tank + $volume;
+        $this->record1->tank_id = $to_tank;
+        $this->record1->save();
         
         
 
