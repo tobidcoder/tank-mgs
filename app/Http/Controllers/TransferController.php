@@ -81,7 +81,7 @@ class TransferController extends Controller
               
 
 
-            return response()->json([
+                return response()->json([
                 'success' => true,
                 'message' => 'Transfer made succesful'
             ], 200);
