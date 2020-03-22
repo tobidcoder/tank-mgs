@@ -63,20 +63,29 @@ class TransferController extends Controller
         * and new volume of  From tank. i.e (Tank that you are making transfer from).
         */
 
-            $this->record->opening_volume = $prev_volume_from_tank;
-            $this->record->closing_volume = $prev_volume_from_tank - $volume;
-            $this->record->tank_id = $from_tank;       
+            $this->record->from_opening_volume = $prev_volume_from_tank;
+            $this->record->from_closing_volume = $prev_volume_from_tank - $volume;
+            $this->record->from_tank_id = $from_tank;       
             
-         $this->record->save();
         /**
         * Create new record for this transfer, to take record of previous volume of To tank,
         * and new volume of  To tank. i.e (Tank that you are making transfer to).
         */
-       
-        $this->record1->opening_volume = $prev_volume_to_tank;
-        $this->record1->closing_volume = $prev_volume_to_tank + $volume;
-        $this->record1->tank_id = $to_tank;
-        $this->record1->save();
+        
+            $this->record1->to_opening_volume = $prev_volume_to_tank;
+            $this->record1->to_closing_volume = $prev_volume_to_tank + $volume;
+            $this->record1->to_tank_id = $to_tank;
+        
+            if($this->record1->save())
+            {
+              
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transfer made succesful'
+            ], 200);
+            }
         
         
 
@@ -92,10 +101,7 @@ class TransferController extends Controller
         //Update tank volume, To Tank
 
         //Return success mesage
-            return response()->json([
-                'success' => true,
-                'message' => 'Transfer made succesful'
-            ], 200);
+            
 
         }
     }

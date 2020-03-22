@@ -15,9 +15,12 @@ class CreateRecordsTable extends Migration
     {
         Schema::create('records', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('opening_volume');
-            $table->integer('closing_volume');
-            $table->integer('tank_id');
+            $table->integer('from_opening_volume');
+            $table->integer('from_closing_volume');
+            $table->integer('from_tank_id');
+            $table->integer('to_opening_volume');
+            $table->integer('to_closing_volume');
+            $table->integer('to_tank_id');
             $table->timestamps();
         });
     }
